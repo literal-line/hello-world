@@ -4,10 +4,10 @@ var HELLO_WORLD = (function () {
 	var info = {
 		version: '',
 		authors: 'Literal Line',
-		width: 1024, // placeholder
-		height: 576, // placeholder
-		widthCSS: '1024px', // placeholder
-		heightCSS: '576px', // placeholder
+		width: window.innerWidth, // placeholder
+		height: window.innerHeight, // placeholder
+		widthCSS: window.innerWidth + 'px', // placeholder
+		heightCSS: window.innerHeight + 'px', // placeholder
 		bg: '#FFFFFF',
 		aa: true
 	};
@@ -15,6 +15,12 @@ var HELLO_WORLD = (function () {
 	var keys = {};
 
 	var initEventListeners = function () {
+		addEventListener('resize', function() {
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			canvas.style.width = window.innerWidth + 'px';
+			canvas.style.height = window.innerHeight + 'px';
+		});
 		addEventListener('keydown', function (e) {
 			keys[e.code] = true;
 		});
@@ -34,6 +40,7 @@ var HELLO_WORLD = (function () {
 		canvas.style.background = info.bg;
 		canvas.style.display = 'block';
 		canvas.style.margin = 'auto';
+		canvas.style.position = 'absolute';
 		canvas.style.imageRendering = info.aa ? 'auto' : 'pixelated';
 		canvas.style.imageRendering = info.aa ? 'auto' : '-moz-crisp-edges';
 		stage.imageSmoothingEnabled = info.aa;
