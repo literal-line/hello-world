@@ -34,8 +34,8 @@ var HELLO_WORLD = (function () {
 		canvas.style.background = info.bg;
 		canvas.style.display = 'block';
 		canvas.style.margin = 'auto';
-		canvas.imageRendering = info.aa ? 'auto' : 'pixelated';
-		canvas.imageRendering = info.aa ? 'auto' : '-moz-crisp-edges';
+		canvas.style.imageRendering = info.aa ? 'auto' : 'pixelated';
+		canvas.style.imageRendering = info.aa ? 'auto' : '-moz-crisp-edges';
 		stage.imageSmoothingEnabled = info.aa;
 	};
 
@@ -59,19 +59,33 @@ var HELLO_WORLD = (function () {
 		this.font = (obj.size || 24) + 'px sans-serif';
 		if (obj.outline) this.strokeText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
 		this.fillText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
-	};
+  };
+
+  var GameEntity = function (x, y) {
+    this.x = x;
+    this.y = y;
+    this.velX = 0;
+    this.velY = 0;
+    this.w = 32;
+    this.h = 32;
+    this.moveSpeed = 10;
+    this.jumpVel = -10;
+    this.gravity = 30;
+  };
 
 	var game = (function () {
 		var levels = {
 			'lol': {
+        startX: 150,
+        startY: 150,
 				width: 25,
 				height: 5,
 				tileData: [
-					'0000002000000000000000000',
-					'0000002000000000000000000',
-					'0000002000000000000000000',
-					'1222222222222222222222223',
-					'6777777777777777777777778'
+					'5222221322222222222222220',
+					'5000006800000000000000004',
+					'5000000000000000000000004',
+					'5222222222222222222222224',
+					'5777777777777777777777774'
 				],
 				itemData: [
 					'',
@@ -85,66 +99,127 @@ var HELLO_WORLD = (function () {
 			var lvlCanvas = document.createElement('canvas');
 			var lvlStage = lvlCanvas.getContext('2d');
 			var playerCanvas = document.createElement('canvas');
-			var playerStage = playerCanvas.getContext('2d');
-			var lastLvl;
-			var camX = 0;
-			var camY = 0;
-			var camZoom = 3;
-			var playerX = 0;
-			var playerY = 0;
+      var playerStage = playerCanvas.getContext('2d');
+      lvlCanvas.style.imageRendering = playerCanvas.style.imageRendering = info.aa ? 'auto' : 'pixelated';
+      lvlCanvas.style.imageRendering = playerCanvas.style.imageRendering = info.aa ? 'auto' : '-moz-crisp-edges';
+      lvlStage.imageSmoothingEnabled = playerStage.imageSmoothingEnabled = stage.imageSmoothingEnabled;
+      var lastLvl;
+      var cam = {
+        x: 0,
+        y: 0,
+        zoom: 2
+      };
+      var tiles;
+      var player = new GameEntity(0, 0);
+      
+      var setPosition = function (x, y) {
+        player = new GameEntity(x, y);
+        cam.x = x,
+        cam.y = y;
+      };
 
-			var controls = function (lvl, obj) {
-				var tileCollision;
-				var updateTileCollision = function () {
-					tileCollision = parseInt(lvlList[lvl].tileData[Math.floor(playerY / 64)].charAt(Math.floor(playerX / 64)));
-				};
-				var whileTile = function (callback) {
-					while (tileCollision) {
-						updateTileCollision();
-						callback();
-					}
-				};
-				updateTileCollision();
-				stage.drawText({ text: tileCollision, x: 50, y: 50 });
-				if (keys[obj.up] && !keys[obj.down]) {
-					playerY -= ms / 5;
-					whileTile(function() { playerY += 1; });
-				}
-				if (keys[obj.down] && !keys[obj.up]) {
-					playerY += ms / 5;
-					whileTile(function() { playerY -= 1; });
-				}
-				if (keys[obj.right] && !keys[obj.left]) {
-					playerX += ms / 5;
-					whileTile(function() { playerX -= 1; });
-				}
-				if (keys[obj.left] && !keys[obj.right]) {
-					playerX -= ms / 5;
-					whileTile(function() { playerX += 1; });
-				}
-			};
+			var pControls = function (obj) {
+				if (keys[obj.right]) player.velX += player.moveSpeed / ms;
+        if (keys[obj.left]) player.velX -= player.moveSpeed / ms;
+        player.velX *= 0.9;
+        player.x += player.velX;
+        tiles.forEach(function(cur) {
+          if (collision(player, cur)) {
+            done = true;
+            player.y--;
+            if (collision(player, cur)) {
+              player.y--;
+              if (collision(player, cur)) {
+                player.y--;
+                if (collision(player, cur)) {
+                  player.y--;
+                  if (collision(player, cur)) {
+                    player.y--;
+                    if (collision(player, cur)) {
+                      player.x += player.velX * -1;
+                      player.y += 5;
+                      player.velX = 0;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        });
+        player.velY += ms / player.gravity;
+        player.y += player.velY;
+        tiles.forEach(function(cur) {
+          if (collision(player, cur)) {
+            player.y += player.velY * -1;
+            player.velY = 0;
+          }
+        });
+        player.y += 2;
+        tiles.forEach(function(cur) {
+          if (collision(player, cur)) {
+            if (keys[obj.up]) player.velY = player.jumpVel;
+          }
+        });
+        player.y--;
+      };
+
+      var cControls = function (obj) {
+        if (keys[obj.zoomIn]) cam.zoom += ms / 500;
+        if (keys[obj.zoomOut]) cam.zoom -= ms / 500;
+        if (cam.zoom < 0.5) cam.zoom = 0.5;
+      };
+
+      var collision = function (rect1, rect2) {
+        return (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y)
+      };
+
+      var doCamera = function () {
+        cControls({ zoomIn: 'Equal', zoomOut: 'Minus' });
+        cam.x += (player.x - cam.x) * (ms / 150);
+        cam.y += (player.y - cam.y) * (ms / 150);
+      };
 
 			var renderLvl = function (lvl) {
-				var lvl = lvlList[lvl];
+        var lvl = lvlList[lvl];
+        tiles = [];
 				lvlCanvas.width = playerCanvas.width = lvl.width * 64;
 				lvlCanvas.height = playerCanvas.height = lvl.height * 64;
 				for (var y = 0; y < lvl.height; y++) {
 					for (var x = 0; x < lvl.width; x++) {
-						var curTile = parseInt(lvl.tileData[y].charAt(x)) * 64;
-						//var curItem = parseInt(lvl.itemData[y].charAt(x)) * 16;
+            var curTile = parseInt(lvl.tileData[y].charAt(x)) * 64;
+            if (curTile) tiles.push({ x: x * 64, y: y * 64, w: 64, h: 64 });
 						lvlStage.drawImage(sprites.tiles, curTile, 0, 64, 64, x * 64, y * 64, 64, 64);
-						//lvlStage.drawImage(sprites.items, curItem, 0, 16, 16, x * 16, y * 16, 16, 16);
 					}
-				}
-				document.body.appendChild(lvlCanvas)
-				document.body.appendChild(playerCanvas)
-			};
+        }
+        lvlCanvas.style.position = playerCanvas.style.position = 'absolute';
+				document.body.appendChild(lvlCanvas);
+        document.body.appendChild(playerCanvas);
+      };
+      
+      var pRender = function () {
+        playerStage.fillRect(Math.round(player.x), Math.round(player.y), 32, 32);
+      };
+
+      var cRender = function () {
+        var x = canvas.width / 2 - cam.x * cam.zoom;
+        var y = canvas.height / 2 - cam.y * cam.zoom;
+        var zoomX = lvlCanvas.width * cam.zoom;
+        var zoomY = lvlCanvas.height * cam.zoom;
+        stage.drawImage(lvlCanvas, x, y, zoomX, zoomY);
+        stage.drawImage(playerCanvas, x, y, zoomX, zoomY);
+      };
 
 			return function (lvl) {
-				if (lvl !== lastLvl) { renderLvl(lvl); lastLvl = lvl; }
-				playerStage.clearRect(playerX - 32, playerY - 32, 64, 64);
-				controls(lvl, { up: 'KeyW', down: 'KeyS', right: 'KeyD', left: 'KeyA' });
-				playerStage.fillRect(playerX - 16, playerY - 16, 32, 32);
+        playerStage.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+        if (lvl !== lastLvl) {
+          renderLvl(lvl);
+          lastLvl = lvl;
+          setPosition(lvlList[lvl].startX, lvlList[lvl].startY);
+        }
+        pControls({ up: 'KeyW', down: 'KeyS', right: 'KeyD', left: 'KeyA' });
+        pRender();
+        doCamera();
+        cRender();
 			}
 		})(levels);
 
@@ -153,7 +228,7 @@ var HELLO_WORLD = (function () {
 		var ms;
 		return {
 			loop: function (delta) {
-				stage.clearRect(0, 0, info.width, info.height);
+				stage.clearRect(0, 0, canvas.width, canvas.height);
 				ms = delta - lastDelta < 100 ? delta - lastDelta : 0;
 				fps = (1000 / ms);
 
