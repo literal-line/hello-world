@@ -9,7 +9,7 @@ var HELLO_WORLD = (function () {
 		widthCSS: '1024px', // placeholder
 		heightCSS: '576px', // placeholder
 		bg: '#FFFFFF',
-		aa: false
+		aa: true
 	};
 
 	var keys = {};
@@ -69,29 +69,46 @@ var HELLO_WORLD = (function () {
     this.w = 32;
     this.h = 32;
     this.moveSpeed = 10;
-    this.jumpVel = -10;
-    this.gravity = 30;
+    this.jumpVel = 10;
+    this.gravity = 10;
   };
 
 	var game = (function () {
 		var levels = {
 			'lol': {
-        startX: 150,
-        startY: 150,
-				width: 25,
-				height: 5,
+        startX: 816,
+        startY: 128,
+				width: 26,
+				height: 26,
 				tileData: [
-					'5222221322222222222222220',
-					'5000006800000000000000004',
-					'5000000000000000000000004',
-					'5222222222222222222222224',
-					'5777777777777777777777774'
+          '0777777777777777777777770',
+          '5777777777777777777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5777777777780067777777774',
+          '5000000000000000000000004',
+          '5000000000000000000000004',
+          '5000000000000000000000004',
+          '0222222222222222222222220'
 				],
-				itemData: [
-					'',
-					'',
-					''
-				],
+				itemData: [ /* bruh */ ],
 			}
 		};
 
@@ -100,9 +117,6 @@ var HELLO_WORLD = (function () {
 			var lvlStage = lvlCanvas.getContext('2d');
 			var playerCanvas = document.createElement('canvas');
       var playerStage = playerCanvas.getContext('2d');
-      lvlCanvas.style.imageRendering = playerCanvas.style.imageRendering = info.aa ? 'auto' : 'pixelated';
-      lvlCanvas.style.imageRendering = playerCanvas.style.imageRendering = info.aa ? 'auto' : '-moz-crisp-edges';
-      lvlStage.imageSmoothingEnabled = playerStage.imageSmoothingEnabled = stage.imageSmoothingEnabled;
       var lastLvl;
       var cam = {
         x: 0,
@@ -146,7 +160,7 @@ var HELLO_WORLD = (function () {
             }
           }
         });
-        player.velY += ms / player.gravity;
+        player.velY += player.gravity / (!ms ? player.gravity : ms);
         player.y += player.velY;
         tiles.forEach(function(cur) {
           if (collision(player, cur)) {
@@ -157,7 +171,7 @@ var HELLO_WORLD = (function () {
         player.y += 2;
         tiles.forEach(function(cur) {
           if (collision(player, cur)) {
-            if (keys[obj.up]) player.velY = player.jumpVel;
+            if (keys[obj.up]) player.velY = -player.jumpVel;
           }
         });
         player.y--;
@@ -167,16 +181,18 @@ var HELLO_WORLD = (function () {
         if (keys[obj.zoomIn]) cam.zoom += ms / 500;
         if (keys[obj.zoomOut]) cam.zoom -= ms / 500;
         if (cam.zoom < 0.5) cam.zoom = 0.5;
+        if (cam.zoom > 5) cam.zoom = 5;
       };
 
       var collision = function (rect1, rect2) {
         return (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y)
       };
 
-      var doCamera = function () {
-        cControls({ zoomIn: 'Equal', zoomOut: 'Minus' });
-        cam.x += (player.x - cam.x) * (ms / 150);
-        cam.y += (player.y - cam.y) * (ms / 150);
+      var doCamera = function (obj) {
+        cControls(obj);
+        cam.x += (player.x + 16 - cam.x) * (ms / 150);
+        cam.y += (player.y + 16 - cam.y) * (ms / 150);
+        stage.drawText({ text: '➖ ➕', x: canvas.width - 84, y: canvas.height - 24 });
       };
 
 			var renderLvl = function (lvl) {
@@ -191,13 +207,10 @@ var HELLO_WORLD = (function () {
 						lvlStage.drawImage(sprites.tiles, curTile, 0, 64, 64, x * 64, y * 64, 64, 64);
 					}
         }
-        lvlCanvas.style.position = playerCanvas.style.position = 'absolute';
-				document.body.appendChild(lvlCanvas);
-        document.body.appendChild(playerCanvas);
       };
       
       var pRender = function () {
-        playerStage.fillRect(Math.round(player.x), Math.round(player.y), 32, 32);
+        playerStage.fillRect(player.x, player.y, 32, 32);
       };
 
       var cRender = function () {
@@ -218,14 +231,14 @@ var HELLO_WORLD = (function () {
         }
         pControls({ up: 'KeyW', down: 'KeyS', right: 'KeyD', left: 'KeyA' });
         pRender();
-        doCamera();
+        doCamera({ zoomIn: 'Equal', zoomOut: 'Minus' });
         cRender();
 			}
 		})(levels);
 
 		var lastDelta = 0;
-		var fps;
-		var ms;
+		var fps = 0;
+		var ms = 0;
 		return {
 			loop: function (delta) {
 				stage.clearRect(0, 0, canvas.width, canvas.height);
