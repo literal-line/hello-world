@@ -2,59 +2,59 @@
 // more at quique.gq
 
 var HELLO_WORLD = (function () {
-	'use strict';
-	
-	
-	var canvas = document.createElement('canvas');
-	var stage = canvas.getContext('2d');
-	var info = {
-		version: 'v0.1-20210212-0325est',
-		authors: 'Literal Line',
-		width: window.innerWidth, // placeholder
-		height: window.innerHeight, // placeholder
-		widthCSS: window.innerWidth + 'px', // placeholder
-		heightCSS: window.innerHeight + 'px', // placeholder
-		bg: '#FFFFFF',
-		aa: false
-	};
+  'use strict';
 
-	var keys = {};
 
-	var initEventListeners = function () {
-		addEventListener('resize', function() {
-			canvas.width = window.innerWidth;
-			canvas.height = window.innerHeight;
-			canvas.style.width = window.innerWidth + 'px';
-			canvas.style.height = window.innerHeight + 'px';
-			stage.imageSmoothingEnabled = info.aa;
-		});
-		addEventListener('keydown', function (e) {
-			keys[e.code] = true;
-		});
-		addEventListener('keyup', function (e) {
-			delete keys[e.code];
-		});
-		addEventListener('blur', function () {
-			keys = {};
-		});
-	};
+  var canvas = document.createElement('canvas');
+  var stage = canvas.getContext('2d');
+  var info = {
+    version: 'v0.1-20210212-0325est',
+    authors: 'Literal Line',
+    width: window.innerWidth, // placeholder
+    height: window.innerHeight, // placeholder
+    widthCSS: window.innerWidth + 'px', // placeholder
+    heightCSS: window.innerHeight + 'px', // placeholder
+    bg: '#FFFFFF',
+    aa: false
+  };
 
-	var initCanvas = function () {
-		canvas.width = info.width;
-		canvas.height = info.height;
-		canvas.style.width = info.widthCSS;
-		canvas.style.height = info.heightCSS;
-		canvas.style.background = info.bg;
-		canvas.style.display = 'block';
-		canvas.style.margin = 'auto';
-		canvas.style.position = 'absolute';
-		canvas.style.imageRendering = info.aa ? 'auto' : 'pixelated';
-		canvas.style.imageRendering = info.aa ? 'auto' : '-moz-crisp-edges';
-		stage.imageSmoothingEnabled = info.aa;
-	};
+  var keys = {};
 
-	var init = function () {
-		initEventListeners();
+  var initEventListeners = function () {
+    addEventListener('resize', function () {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      stage.imageSmoothingEnabled = info.aa;
+    });
+    addEventListener('keydown', function (e) {
+      keys[e.code] = true;
+    });
+    addEventListener('keyup', function (e) {
+      delete keys[e.code];
+    });
+    addEventListener('blur', function () {
+      keys = {};
+    });
+  };
+
+  var initCanvas = function () {
+    canvas.width = info.width;
+    canvas.height = info.height;
+    canvas.style.width = info.widthCSS;
+    canvas.style.height = info.heightCSS;
+    canvas.style.background = info.bg;
+    canvas.style.display = 'block';
+    canvas.style.margin = 'auto';
+    canvas.style.position = 'absolute';
+    canvas.style.imageRendering = info.aa ? 'auto' : 'pixelated';
+    canvas.style.imageRendering = info.aa ? 'auto' : '-moz-crisp-edges';
+    stage.imageSmoothingEnabled = info.aa;
+  };
+
+  var init = function () {
+    initEventListeners();
     initCanvas();
     console.log('hello-world');
     console.log('by ' + info.authors);
@@ -78,31 +78,31 @@ var HELLO_WORLD = (function () {
     audio.bgm.play();
   };
 
-	var assets = {
+  var assets = {
     spriteTilesDefault: './assets/tilesDefault.png',
     spriteTilesGrass: './assets/tilesGrass.png',
     spriteSpunchBob: './assets/spunch bob.jpg',
     spriteBgOcean: './assets/ocean.jpg',
     audioBgm: './assets/Koukyoukyoku \'Douran\' Dai\'ni Gakushou Yori.mp3'
-	};
+  };
 
-	var sprites = {
+  var sprites = {
     tilesDefault: newImage(assets.spriteTilesDefault),
     tilesGrass: newImage(assets.spriteTilesGrass),
     spunchBob: newImage(assets.spriteSpunchBob)
   };
-  
+
   var audio = {
     bgm: new Audio(assets.audioBgm)
   };
 
-	CanvasRenderingContext2D.prototype.drawText = function (obj) { // more uniform way of drawing text
-		this.fillStyle = obj.color || '#000000';
-		this.strokeStyle = obj.outlineColor || '#000000';
-		this.lineWidth = obj.outlineWidth || 2;
-		this.font = (obj.size || 24) + 'px Courier New';
-		if (obj.outline) this.strokeText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
-		this.fillText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
+  CanvasRenderingContext2D.prototype.drawText = function (obj) { // more uniform way of drawing text
+    this.fillStyle = obj.color || '#000000';
+    this.strokeStyle = obj.outlineColor || '#000000';
+    this.lineWidth = obj.outlineWidth || 2;
+    this.font = (obj.size || 24) + 'px Courier New';
+    if (obj.outline) this.strokeText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
+    this.fillText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
   };
 
   var GameEntity = function (obj) {
@@ -118,21 +118,21 @@ var HELLO_WORLD = (function () {
     this.texture = obj.texture || false;
   };
 
-	var game = (function () {
+  var game = (function () {
     var tilesets = {
       default: sprites.tilesDefault,
       grass: sprites.tilesGrass
     };
 
-		var levels = {
-			'test': {
+    var levels = {
+      'test': {
         startX: 752,
         startY: 128,
-				width: 24,
+        width: 24,
         height: 12,
         bg: 'url(' + assets.spriteBgOcean + ') no-repeat',
         tileset: 'default',
-				tileData: [
+        tileData: [
           'k7777777777777777777777l',
           '500000000000000000000004',
           '500000000000000000000004',
@@ -145,15 +145,15 @@ var HELLO_WORLD = (function () {
           '50000000000000001e99d004',
           '500000000000000167800014',
           'm2222222222222222222222n'
-				],
-				itemData: [ /* bruh */ ],
-			}
-		};
+        ],
+        itemData: [ /* bruh */],
+      }
+    };
 
-		var playLevel = (function (tilesetList, lvlList) {
-			var lvlCanvas = document.createElement('canvas');
-			var lvlStage = lvlCanvas.getContext('2d');
-			var playerCanvas = document.createElement('canvas');
+    var playLevel = (function (tilesetList, lvlList) {
+      var lvlCanvas = document.createElement('canvas');
+      var lvlStage = lvlCanvas.getContext('2d');
+      var playerCanvas = document.createElement('canvas');
       var playerStage = playerCanvas.getContext('2d');
       var lastLvl;
       var cam = {
@@ -163,7 +163,7 @@ var HELLO_WORLD = (function () {
       };
       var tiles;
       var player;
-      
+
       var setPosition = function (x, y) {
         player = new GameEntity({
           x: x,
@@ -173,15 +173,15 @@ var HELLO_WORLD = (function () {
           texture: sprites.spunchBob
         });
         cam.x = x,
-        cam.y = y;
+          cam.y = y;
       };
 
-			var pControls = function (obj) {
-				if (keys[obj.right]) player.velX += ms / player.moveSpeed;
+      var pControls = function (obj) {
+        if (keys[obj.right]) player.velX += ms / player.moveSpeed;
         if (keys[obj.left]) player.velX -= ms / player.moveSpeed;
         player.velX *= 0.9;
         player.x += player.velX;
-        tiles.forEach(function(cur) {
+        tiles.forEach(function (cur) {
           if (collision(player, cur)) {
             player.y--;
             if (collision(player, cur)) {
@@ -205,14 +205,14 @@ var HELLO_WORLD = (function () {
         });
         player.velY += player.gravity;
         player.y += player.velY;
-        tiles.forEach(function(cur) {
+        tiles.forEach(function (cur) {
           if (collision(player, cur)) {
             player.y += player.velY * -1;
             player.velY = 0;
           }
         });
         player.y += 2;
-        tiles.forEach(function(cur) {
+        tiles.forEach(function (cur) {
           if (collision(player, cur)) {
             if (keys[obj.up]) player.velY = -player.jumpVel;
           }
@@ -239,22 +239,22 @@ var HELLO_WORLD = (function () {
         stage.drawText({ text: 'Camera: ➖ ➕', color: 'rgba(255, 255, 255, 0.75)', x: canvas.width - 202, y: canvas.height - 24 });
       };
 
-			var renderLvl = function (lvl) {
+      var renderLvl = function (lvl) {
         var lvl = lvlList[lvl];
         var tileset = tilesetList[lvl.tileset];
         tiles = [];
-				lvlCanvas.width = playerCanvas.width = lvl.width * 64;
+        lvlCanvas.width = playerCanvas.width = lvl.width * 64;
         lvlCanvas.height = playerCanvas.height = lvl.height * 64;
         canvas.style.background = lvl.bg;
-				for (var y = 0; y < lvl.height; y++) {
-					for (var x = 0; x < lvl.width; x++) {
+        for (var y = 0; y < lvl.height; y++) {
+          for (var x = 0; x < lvl.width; x++) {
             var curTile = parseInt(lvl.tileData[y].charAt(x), 36) * 64;
             if (curTile) tiles.push({ x: x * 64, y: y * 64, w: 64, h: 64 });
-						lvlStage.drawImage(tileset, curTile, 0, 64, 64, x * 64, y * 64, 64, 64);
-					}
+            lvlStage.drawImage(tileset, curTile, 0, 64, 64, x * 64, y * 64, 64, 64);
+          }
         }
       };
-      
+
       var pRender = function () {
         var x = Math.round(player.x);
         var y = Math.round(player.y);
@@ -272,7 +272,7 @@ var HELLO_WORLD = (function () {
         stage.drawImage(playerCanvas, x, y, zoomX, zoomY);
       };
 
-			return function (lvl) {
+      return function (lvl) {
         playerStage.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
         if (lvl !== lastLvl) {
           renderLvl(lvl);
@@ -283,55 +283,55 @@ var HELLO_WORLD = (function () {
         pRender();
         cRender();
         doCamera({ zoomIn: 'Equal', zoomOut: 'Minus' });
-			}
-		})(tilesets, levels);
+      }
+    })(tilesets, levels);
 
-		var lastDelta = 0;
-		var fps = 0;
-		var ms = 0;
-		return {
-			loop: function (delta) {
-				stage.clearRect(0, 0, canvas.width, canvas.height);
-				ms = delta - lastDelta < 100 ? delta - lastDelta : 1;
-				fps = (1000 / ms);
+    var lastDelta = 0;
+    var fps = 0;
+    var ms = 0;
+    return {
+      loop: function (delta) {
+        stage.clearRect(0, 0, canvas.width, canvas.height);
+        ms = delta - lastDelta < 100 ? delta - lastDelta : 1;
+        fps = (1000 / ms);
 
-				playLevel('test');
+        playLevel('test');
 
-				stage.drawText({ text: 'FPS: ' + Math.floor(fps), color: 'rgba(255, 255, 255, 0.75)', x: 0, y: 24 });
-				lastDelta = delta;
-				requestAnimationFrame(game.loop);
-			}
-		}
-	})();
+        stage.drawText({ text: 'FPS: ' + Math.floor(fps), color: 'rgba(255, 255, 255, 0.75)', x: 0, y: 24 });
+        lastDelta = delta;
+        requestAnimationFrame(game.loop);
+      }
+    }
+  })();
 
-	return {
-		init: function () {
+  return {
+    init: function () {
       init();
       ctb();
     }
-	}
+  }
 })();
 
 function newImage(src) {
-	var img = document.createElement('img');
-	img.src = src;
-	return img;
+  var img = document.createElement('img');
+  img.src = src;
+  return img;
 }
 
 function convertBase(value, from_base, to_base) { // i know you can convert base 36 to 10 and whatever without this but i like it so im gonna use it
-	var range = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/'.split('');
-	var from_range = range.slice(0, from_base);
-	var to_range = range.slice(0, to_base);
+  var range = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/'.split('');
+  var from_range = range.slice(0, from_base);
+  var to_range = range.slice(0, to_base);
 
-	var dec_value = value.split('').reverse().reduce(function (carry, digit, index) {
-		if (from_range.indexOf(digit) === -1) throw new Error('Invalid digit `' + digit + '` for base ' + from_base + '.');
-		return carry += from_range.indexOf(digit) * (Math.pow(from_base, index));
-	}, 0);
+  var dec_value = value.split('').reverse().reduce(function (carry, digit, index) {
+    if (from_range.indexOf(digit) === -1) throw new Error('Invalid digit `' + digit + '` for base ' + from_base + '.');
+    return carry += from_range.indexOf(digit) * (Math.pow(from_base, index));
+  }, 0);
 
-	var new_value = '';
-	while (dec_value > 0) {
-		new_value = to_range[dec_value % to_base] + new_value;
-		dec_value = (dec_value - (dec_value % to_base)) / to_base;
-	}
-	return new_value || '0';
+  var new_value = '';
+  while (dec_value > 0) {
+    new_value = to_range[dec_value % to_base] + new_value;
+    dec_value = (dec_value - (dec_value % to_base)) / to_base;
+  }
+  return new_value || '0';
 }
