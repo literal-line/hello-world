@@ -29,7 +29,6 @@ var HELLO_WORLD = (function () {
 			stage.imageSmoothingEnabled = info.aa;
 		});
 		addEventListener('keydown', function (e) {
-      e.preventDefault();
 			keys[e.code] = true;
 		});
 		addEventListener('keyup', function (e) {
