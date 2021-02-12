@@ -275,8 +275,8 @@ var HELLO_WORLD = (function () {
         }
         pControls({ up: 'KeyW', down: 'KeyS', right: 'KeyD', left: 'KeyA' });
         pRender();
-        doCamera({ zoomIn: 'Equal', zoomOut: 'Minus' });
         cRender();
+        doCamera({ zoomIn: 'Equal', zoomOut: 'Minus' });
 			}
 		})(tilesets, levels);
 
