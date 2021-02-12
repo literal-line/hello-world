@@ -2,9 +2,9 @@
 // more at quique.gq
 
 var HELLO_WORLD = (function () {
-  'use strict';
-
-
+	'use strict';
+	
+	
 	var canvas = document.createElement('canvas');
 	var stage = canvas.getContext('2d');
 	var info = {
@@ -26,6 +26,7 @@ var HELLO_WORLD = (function () {
 			canvas.height = window.innerHeight;
 			canvas.style.width = window.innerWidth + 'px';
 			canvas.style.height = window.innerHeight + 'px';
+			stage.imageSmoothingEnabled = info.aa;
 		});
 		addEventListener('keydown', function (e) {
       e.preventDefault();
