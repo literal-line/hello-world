@@ -229,8 +229,8 @@ var HELLO_WORLD = (function () {
         cControls(obj);
         cam.x += (player.x + Math.round(player.w / 2) - cam.x) * (ms / 150);
         cam.y += (player.y + Math.round(player.h / 2) - cam.y) * (ms / 150);
-        stage.drawText({ text: 'Move: WASD', x: 20, y: canvas.height - 24 });
-        stage.drawText({ text: 'Camera: ➖ ➕', x: canvas.width - 202, y: canvas.height - 24 });
+        stage.drawText({ text: 'Move: WASD', color: 'rgba(255, 255, 255, 0.75)', x: 20, y: canvas.height - 24 });
+        stage.drawText({ text: 'Camera: ➖ ➕', color: 'rgba(255, 255, 255, 0.75)', x: canvas.width - 202, y: canvas.height - 24 });
       };
 
 			var renderLvl = function (lvl) {
