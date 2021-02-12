@@ -9,7 +9,7 @@ var HELLO_WORLD = (function () {
 		widthCSS: window.innerWidth + 'px', // placeholder
 		heightCSS: window.innerHeight + 'px', // placeholder
 		bg: '#FFFFFF',
-		aa: true
+		aa: false
 	};
 
 	var keys = {};
@@ -22,6 +22,7 @@ var HELLO_WORLD = (function () {
 			canvas.style.height = window.innerHeight + 'px';
 		});
 		addEventListener('keydown', function (e) {
+      e.preventDefault();
 			keys[e.code] = true;
 		});
 		addEventListener('keyup', function (e) {
@@ -48,78 +49,101 @@ var HELLO_WORLD = (function () {
 
 	var init = function () {
 		initEventListeners();
-		initCanvas();
-	};
+    initCanvas();
+    console.log('hello-world');
+    console.log('by ' + info.authors);
+  };
+
+  var ctb = function () {
+    var button = document.createElement('button');
+    button.onclick = function () {
+      go();
+      button.remove();
+    };
+    button.style = 'padding: 10px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: "Courier New"; font-size: 2vw';
+    button.innerHTML = 'Click to begin';
+    document.body.insertAdjacentElement('afterbegin', button);
+  };
+
+  var go = function () {
+    document.body.insertAdjacentElement('afterbegin', canvas);
+    requestAnimationFrame(game.loop);
+    audio.bgm.play();
+  };
 
 	var assets = {
-		spriteTiles: './assets/tiles.png'
+    spriteTilesDefault: './assets/tilesDefault.png',
+    spriteTilesGrass: './assets/tilesGrass.png',
+    spriteSpunchBob: './assets/spunch bob.jpg',
+    spriteBgOcean: './assets/ocean.jpg',
+    audioBgm: './assets/Koukyoukyoku \'Douran\' Dai\'ni Gakushou Yori.mp3'
 	};
 
 	var sprites = {
-		tiles: newImage(assets.spriteTiles)
-	};
+    tilesDefault: newImage(assets.spriteTilesDefault),
+    tilesGrass: newImage(assets.spriteTilesGrass),
+    spunchBob: newImage(assets.spriteSpunchBob)
+  };
+  
+  var audio = {
+    bgm: new Audio(assets.audioBgm)
+  };
 
 	CanvasRenderingContext2D.prototype.drawText = function (obj) { // more uniform way of drawing text
 		this.fillStyle = obj.color || '#000000';
 		this.strokeStyle = obj.outlineColor || '#000000';
 		this.lineWidth = obj.outlineWidth || 2;
-		this.font = (obj.size || 24) + 'px sans-serif';
+		this.font = (obj.size || 24) + 'px Courier New';
 		if (obj.outline) this.strokeText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
 		this.fillText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
   };
 
-  var GameEntity = function (x, y) {
-    this.x = x;
-    this.y = y;
+  var GameEntity = function (obj) {
+    this.x = obj.x || 0;
+    this.y = obj.y || 0;
     this.velX = 0;
     this.velY = 0;
-    this.w = 32;
-    this.h = 32;
-    this.moveSpeed = 10;
-    this.jumpVel = 10;
-    this.gravity = 10;
+    this.w = obj.w || 32;
+    this.h = obj.h || 32;
+    this.moveSpeed = obj.moveSpeed || 10;
+    this.jumpVel = obj.jumpVel || 16;
+    this.gravity = obj.gravity || 16;
+    this.texture = obj.texture || false;
   };
 
 	var game = (function () {
+    var tilesets = {
+      default: sprites.tilesDefault,
+      grass: sprites.tilesGrass
+    };
+
 		var levels = {
-			'lol': {
-        startX: 816,
+			'test': {
+        startX: 752,
         startY: 128,
-				width: 26,
-				height: 26,
+				width: 24,
+        height: 12,
+        bg: 'url(' + assets.spriteBgOcean + ') no-repeat',
+        tileset: 'default',
 				tileData: [
-          '0777777777777777777777770',
-          '5777777777777777777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5777777777780067777777774',
-          '5000000000000000000000004',
-          '5000000000000000000000004',
-          '5000000000000000000000004',
-          '0222222222222222222222220'
+          'k7777777777777777777777l',
+          '500000000000000000000004',
+          '500000000000000000000004',
+          '500000000000000000000004',
+          '500000000000000000000004',
+          '500000000000000000000004',
+          '500000000000000000000004',
+          '5000000000000000000000e4',
+          '5000000000000000000b0004',
+          '50000000000000001e99d004',
+          '500000000000000167800014',
+          'm2222222222222222222222n'
 				],
 				itemData: [ /* bruh */ ],
 			}
 		};
 
-		var playLevel = (function (lvlList) {
+		var playLevel = (function (tilesetList, lvlList) {
 			var lvlCanvas = document.createElement('canvas');
 			var lvlStage = lvlCanvas.getContext('2d');
 			var playerCanvas = document.createElement('canvas');
@@ -131,10 +155,16 @@ var HELLO_WORLD = (function () {
         zoom: 2
       };
       var tiles;
-      var player = new GameEntity(0, 0);
+      var player;
       
       var setPosition = function (x, y) {
-        player = new GameEntity(x, y);
+        player = new GameEntity({
+          x: x,
+          y: y,
+          w: 48,
+          h: 48,
+          texture: sprites.spunchBob
+        });
         cam.x = x,
         cam.y = y;
       };
@@ -167,7 +197,7 @@ var HELLO_WORLD = (function () {
             }
           }
         });
-        player.velY += player.gravity / (!ms ? player.gravity : ms);
+        player.velY += player.gravity / ms;
         player.y += player.velY;
         tiles.forEach(function(cur) {
           if (collision(player, cur)) {
@@ -175,7 +205,7 @@ var HELLO_WORLD = (function () {
             player.velY = 0;
           }
         });
-        player.y += 2;
+        player.y += 1.5;
         tiles.forEach(function(cur) {
           if (collision(player, cur)) {
             if (keys[obj.up]) player.velY = -player.jumpVel;
@@ -197,27 +227,34 @@ var HELLO_WORLD = (function () {
 
       var doCamera = function (obj) {
         cControls(obj);
-        cam.x += (player.x + 16 - cam.x) * (ms / 150);
-        cam.y += (player.y + 16 - cam.y) * (ms / 150);
-        stage.drawText({ text: '➖ ➕', x: canvas.width - 84, y: canvas.height - 24 });
+        cam.x += (player.x + Math.round(player.w / 2) - cam.x) * (ms / 150);
+        cam.y += (player.y + Math.round(player.h / 2) - cam.y) * (ms / 150);
+        stage.drawText({ text: 'Move: WASD', x: 20, y: canvas.height - 24 });
+        stage.drawText({ text: 'Camera: ➖ ➕', x: canvas.width - 202, y: canvas.height - 24 });
       };
 
 			var renderLvl = function (lvl) {
         var lvl = lvlList[lvl];
+        var tileset = tilesetList[lvl.tileset];
         tiles = [];
 				lvlCanvas.width = playerCanvas.width = lvl.width * 64;
-				lvlCanvas.height = playerCanvas.height = lvl.height * 64;
+        lvlCanvas.height = playerCanvas.height = lvl.height * 64;
+        canvas.style.background = lvl.bg;
 				for (var y = 0; y < lvl.height; y++) {
 					for (var x = 0; x < lvl.width; x++) {
-            var curTile = parseInt(lvl.tileData[y].charAt(x)) * 64;
+            var curTile = parseInt(lvl.tileData[y].charAt(x), 36) * 64;
             if (curTile) tiles.push({ x: x * 64, y: y * 64, w: 64, h: 64 });
-						lvlStage.drawImage(sprites.tiles, curTile, 0, 64, 64, x * 64, y * 64, 64, 64);
+						lvlStage.drawImage(tileset, curTile, 0, 64, 64, x * 64, y * 64, 64, 64);
 					}
         }
       };
       
       var pRender = function () {
-        playerStage.fillRect(player.x, player.y, 32, 32);
+        var x = Math.round(player.x);
+        var y = Math.round(player.y);
+        var w = player.w;
+        var h = player.h;
+        if (player.texture) playerStage.drawImage(player.texture, x, y, w, h); else playerStage.fillRect(x, y, w, h);
       };
 
       var cRender = function () {
@@ -241,7 +278,7 @@ var HELLO_WORLD = (function () {
         doCamera({ zoomIn: 'Equal', zoomOut: 'Minus' });
         cRender();
 			}
-		})(levels);
+		})(tilesets, levels);
 
 		var lastDelta = 0;
 		var fps = 0;
@@ -249,12 +286,12 @@ var HELLO_WORLD = (function () {
 		return {
 			loop: function (delta) {
 				stage.clearRect(0, 0, canvas.width, canvas.height);
-				ms = delta - lastDelta < 100 ? delta - lastDelta : 0;
+				ms = delta - lastDelta < 100 ? delta - lastDelta : 1;
 				fps = (1000 / ms);
 
-				playLevel('lol');
+				playLevel('test');
 
-				stage.drawText({ text: 'FPS: ' + Math.floor(fps), color: 'rgba(0, 0, 0, 0.75)', x: 0, y: 24 });
+				stage.drawText({ text: 'FPS: ' + Math.floor(fps), color: 'rgba(255, 255, 255, 0.75)', x: 0, y: 24 });
 				lastDelta = delta;
 				requestAnimationFrame(game.loop);
 			}
@@ -262,11 +299,10 @@ var HELLO_WORLD = (function () {
 	})();
 
 	return {
-		go: function () {
-			init();
-			document.body.insertAdjacentElement('afterbegin', canvas);
-			requestAnimationFrame(game.loop);
-		}
+		init: function () {
+      init();
+      ctb();
+    }
 	}
 })();
 
