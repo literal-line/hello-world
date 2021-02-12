@@ -75,6 +75,7 @@ var HELLO_WORLD = (function () {
   var go = function () {
     document.body.insertAdjacentElement('afterbegin', canvas);
     requestAnimationFrame(game.loop);
+    audio.bgm.volume = 0.5;
     audio.bgm.play();
   };
 
@@ -113,8 +114,8 @@ var HELLO_WORLD = (function () {
     this.w = obj.w || 32;
     this.h = obj.h || 32;
     this.moveSpeed = obj.moveSpeed || 10;
-    this.jumpVel = obj.jumpVel || 16;
-    this.gravity = obj.gravity || 16;
+    this.jumpVel = obj.jumpVel || 15;
+    this.gravity = obj.gravity || 1;
     this.texture = obj.texture || false;
   };
 
@@ -177,8 +178,8 @@ var HELLO_WORLD = (function () {
       };
 
 			var pControls = function (obj) {
-				if (keys[obj.right]) player.velX += player.moveSpeed / ms;
-        if (keys[obj.left]) player.velX -= player.moveSpeed / ms;
+				if (keys[obj.right]) player.velX += ms / player.moveSpeed;
+        if (keys[obj.left]) player.velX -= ms / player.moveSpeed;
         player.velX *= 0.9;
         player.x += player.velX;
         tiles.forEach(function(cur) {
@@ -203,7 +204,7 @@ var HELLO_WORLD = (function () {
             }
           }
         });
-        player.velY += player.gravity / ms;
+        player.velY += player.gravity;
         player.y += player.velY;
         tiles.forEach(function(cur) {
           if (collision(player, cur)) {
@@ -211,7 +212,7 @@ var HELLO_WORLD = (function () {
             player.velY = 0;
           }
         });
-        player.y += 1.5;
+        player.y += 2;
         tiles.forEach(function(cur) {
           if (collision(player, cur)) {
             if (keys[obj.up]) player.velY = -player.jumpVel;
