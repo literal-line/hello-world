@@ -1,8 +1,14 @@
+// hello-world by Literal Line
+// more at quique.gq
+
 var HELLO_WORLD = (function () {
+  'use strict';
+
+
 	var canvas = document.createElement('canvas');
 	var stage = canvas.getContext('2d');
 	var info = {
-		version: '',
+		version: 'v0.1-20210212-0325est',
 		authors: 'Literal Line',
 		width: window.innerWidth, // placeholder
 		height: window.innerHeight, // placeholder
@@ -176,7 +182,6 @@ var HELLO_WORLD = (function () {
         player.x += player.velX;
         tiles.forEach(function(cur) {
           if (collision(player, cur)) {
-            done = true;
             player.y--;
             if (collision(player, cur)) {
               player.y--;
