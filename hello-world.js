@@ -45,6 +45,7 @@ var HELLO_WORLD = (function () {
     canvas.style.width = info.widthCSS;
     canvas.style.height = info.heightCSS;
     canvas.style.background = info.bg;
+    canvas.style.backgroundSize = '100% 100%';
     canvas.style.display = 'block';
     canvas.style.margin = 'auto';
     canvas.style.position = 'absolute';
@@ -130,7 +131,7 @@ var HELLO_WORLD = (function () {
         startY: 128,
         width: 24,
         height: 12,
-        bg: 'url(' + assets.spriteBgOcean + ') no-repeat',
+        bg: 'url(' + assets.spriteBgOcean + ')',
         tileset: 'default',
         tileData: [
           'k7777777777777777777777l',
