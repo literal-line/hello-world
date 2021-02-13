@@ -113,7 +113,7 @@ var HELLO_WORLD = (function () {
     this.velY = 0;
     this.w = obj.w || 32;
     this.h = obj.h || 32;
-    this.moveSpeed = obj.moveSpeed || 10;
+    this.moveSpeed = obj.moveSpeed || 0.5;
     this.jumpVel = obj.jumpVel || 15;
     this.gravity = obj.gravity || 1;
     this.texture = obj.texture || false;
@@ -178,10 +178,10 @@ var HELLO_WORLD = (function () {
       };
 
       var pControls = function (obj) {
-        if (keys[obj.right]) player.velX += ms / player.moveSpeed;
-        if (keys[obj.left]) player.velX -= ms / player.moveSpeed;
+        if (keys[obj.right]) player.velX += player.moveSpeed;
+        if (keys[obj.left]) player.velX -= player.moveSpeed;
         player.velX *= 0.9;
-        player.x += player.velX;
+        player.x += player.velX * timeStep;
         tiles.forEach(function (cur) {
           if (collision(player, cur)) {
             player.y--;
@@ -194,7 +194,7 @@ var HELLO_WORLD = (function () {
                   if (collision(player, cur)) {
                     player.y--;
                     if (collision(player, cur)) {
-                      player.x += player.velX * -1;
+                      player.x += player.velX * timeStep * -1;
                       player.y += 5;
                       player.velX = 0;
                     }
@@ -204,11 +204,11 @@ var HELLO_WORLD = (function () {
             }
           }
         });
-        player.velY += player.gravity;
-        player.y += player.velY;
+        player.velY += player.gravity * timeStep;
+        player.y += player.velY * timeStep;
         tiles.forEach(function (cur) {
           if (collision(player, cur)) {
-            player.y += player.velY * -1;
+            player.y += player.velY * timeStep * -1;
             player.velY = 0;
           }
         });
@@ -222,8 +222,8 @@ var HELLO_WORLD = (function () {
       };
 
       var cControls = function (obj) {
-        if (keys[obj.zoomIn]) cam.zoom += ms / 500;
-        if (keys[obj.zoomOut]) cam.zoom -= ms / 500;
+        if (keys[obj.zoomIn]) cam.zoom += (1 / 30) * cam.zoom * timeStep;
+        if (keys[obj.zoomOut]) cam.zoom -= (1 / 30) * cam.zoom * timeStep;
         if (cam.zoom < 0.5) cam.zoom = 0.5;
         if (cam.zoom > 5) cam.zoom = 5;
       };
@@ -234,8 +234,8 @@ var HELLO_WORLD = (function () {
 
       var doCamera = function (obj) {
         cControls(obj);
-        cam.x += (player.x + Math.round(player.w / 2) - cam.x) * (ms / 150);
-        cam.y += (player.y + Math.round(player.h / 2) - cam.y) * (ms / 150);
+        cam.x += (player.x + Math.round(player.w / 2) - cam.x) * 0.1 * timeStep;
+        cam.y += (player.y + Math.round(player.h / 2) - cam.y) * 0.1 * timeStep;
         stage.drawText({ text: 'Move: WASD', color: 'rgba(255, 255, 255, 0.75)', x: 20, y: canvas.height - 24 });
         stage.drawText({ text: 'Camera: ➖ ➕', color: 'rgba(255, 255, 255, 0.75)', x: canvas.width - 202, y: canvas.height - 24 });
       };
@@ -290,11 +290,14 @@ var HELLO_WORLD = (function () {
     var lastDelta = 0;
     var fps = 0;
     var ms = 0;
+    var timeStep = 1;
     return {
       loop: function (delta) {
         stage.clearRect(0, 0, canvas.width, canvas.height);
-        ms = delta - lastDelta < 100 ? delta - lastDelta : 1;
+        ms = delta - lastDelta < 100 ? delta - lastDelta : (1000 / 60);
         fps = (1000 / ms);
+        timeStep = 2;
+        timeStep = ms / (1000 / 60);
 
         playLevel('test');
 
