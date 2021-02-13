@@ -1,7 +1,7 @@
 // hello-world by Literal Line
 // more at quique.gq
 
-var HELLO_WORLD = (function () {
+var HELLO_WORLD = function () {
   'use strict';
 
 
@@ -83,6 +83,7 @@ var HELLO_WORLD = (function () {
     spriteTilesDefault: './assets/tilesDefault.png',
     spriteTilesGrass: './assets/tilesGrass.png',
     spriteSpunchBob: './assets/spunch bob.jpg',
+    spritePatrice: './assets/patrice.png',
     spriteBgOcean: './assets/ocean.jpg',
     audioBgm: './assets/Koukyoukyoku \'Douran\' Dai\'ni Gakushou Yori.mp3'
   };
@@ -90,7 +91,8 @@ var HELLO_WORLD = (function () {
   var sprites = {
     tilesDefault: newImage(assets.spriteTilesDefault),
     tilesGrass: newImage(assets.spriteTilesGrass),
-    spunchBob: newImage(assets.spriteSpunchBob)
+    spunchBob: newImage(assets.spriteSpunchBob),
+    patrice: newImage(assets.spritePatrice)
   };
 
   var audio = {
@@ -106,6 +108,10 @@ var HELLO_WORLD = (function () {
     this.fillText(obj.text, obj.center ? obj.x - this.measureText(obj.text).width / 2 : obj.x, obj.y);
   };
 
+  var collision = function (rect1, rect2) {
+    return (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y)
+  };
+
   var GameEntity = function (obj) {
     this.x = obj.x || 0;
     this.y = obj.y || 0;
@@ -117,6 +123,64 @@ var HELLO_WORLD = (function () {
     this.jumpVel = obj.jumpVel || 15;
     this.gravity = obj.gravity || 1;
     this.texture = obj.texture || false;
+    this.direction = obj.direction || 'right';
+    this.controls = obj.controls || { up: false, down: false, right: false, left: false };
+  };
+
+  GameEntity.prototype.physics = function (tiles, timeStep) {
+    var self = this;
+    if (self.controls.right) { self.direction = 'right'; self.velX += self.moveSpeed; }
+    if (self.controls.left) { self.direction = 'left'; self.velX -= self.moveSpeed; }
+    self.velX *= 0.9;
+    self.x += self.velX * timeStep;
+    tiles.forEach(function (cur) {
+      if (collision(self, cur)) {
+        var col = 0;
+        while (collision(self, cur)) {
+          self.y--;
+          col++
+        }
+        if (col > 10) {
+          self.x += self.velX * timeStep * -1;
+          self.y += col;
+          self.velX = 0;
+        }
+      }
+    });
+    self.velY += self.gravity * timeStep;
+    self.y += self.velY * timeStep;
+    tiles.forEach(function (cur) {
+      if (collision(self, cur)) {
+        self.y += self.velY * timeStep * -1;
+        self.velY = 0;
+      }
+    });
+    self.y += 2;
+    tiles.forEach(function (cur) {
+      if (collision(self, cur)) {
+        if (self.controls.up) self.velY = -self.jumpVel;
+      }
+    });
+    self.y--;
+  };
+
+  GameEntity.prototype.render = function (stage) {
+    var x = Math.round(this.x);
+    var y = Math.round(this.y);
+    var w = this.w;
+    var h = this.h;
+    var t = this.texture;
+    var d = this.direction;
+    if (t) {
+      if (d === 'right') {
+        stage.drawImage(t, x, y, w, h);
+      } else if (d === 'left') {
+        stage.drawImage(t.flipped, x, y, w, h);
+      }
+    } else {
+      stage.fillStyle = '#000000';
+      stage.fillRect(x, y, w, h);
+    }
   };
 
   var game = (function () {
@@ -144,18 +208,21 @@ var HELLO_WORLD = (function () {
           '5000000000000000000000e4',
           '5000000000000000000b0004',
           '50000000000000001e99d004',
-          '500000000000000167800014',
+          '500000000000000140500014',
           'm2222222222222222222222n'
         ],
         itemData: [ /* bruh */],
+        entityData: [
+          new GameEntity({ x: 272, y: 311, texture: sprites.patrice })
+        ]
       }
     };
 
     var playLevel = (function (tilesetList, lvlList) {
       var lvlCanvas = document.createElement('canvas');
       var lvlStage = lvlCanvas.getContext('2d');
-      var playerCanvas = document.createElement('canvas');
-      var playerStage = playerCanvas.getContext('2d');
+      var entityCanvas = document.createElement('canvas');
+      var entityStage = entityCanvas.getContext('2d');
       var lastLvl;
       var cam = {
         x: 0,
@@ -173,52 +240,8 @@ var HELLO_WORLD = (function () {
           h: 48,
           texture: sprites.spunchBob
         });
-        cam.x = x,
-          cam.y = y;
-      };
-
-      var pControls = function (obj) {
-        if (keys[obj.right]) player.velX += player.moveSpeed;
-        if (keys[obj.left]) player.velX -= player.moveSpeed;
-        player.velX *= 0.9;
-        player.x += player.velX * timeStep;
-        tiles.forEach(function (cur) {
-          if (collision(player, cur)) {
-            player.y--;
-            if (collision(player, cur)) {
-              player.y--;
-              if (collision(player, cur)) {
-                player.y--;
-                if (collision(player, cur)) {
-                  player.y--;
-                  if (collision(player, cur)) {
-                    player.y--;
-                    if (collision(player, cur)) {
-                      player.x += player.velX * timeStep * -1;
-                      player.y += 5;
-                      player.velX = 0;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        });
-        player.velY += player.gravity * timeStep;
-        player.y += player.velY * timeStep;
-        tiles.forEach(function (cur) {
-          if (collision(player, cur)) {
-            player.y += player.velY * timeStep * -1;
-            player.velY = 0;
-          }
-        });
-        player.y += 2;
-        tiles.forEach(function (cur) {
-          if (collision(player, cur)) {
-            if (keys[obj.up]) player.velY = -player.jumpVel;
-          }
-        });
-        player.y--;
+        cam.x = x;
+        cam.y = y;
       };
 
       var cControls = function (obj) {
@@ -226,10 +249,6 @@ var HELLO_WORLD = (function () {
         if (keys[obj.zoomOut]) cam.zoom -= (1 / 30) * cam.zoom * timeStep;
         if (cam.zoom < 0.5) cam.zoom = 0.5;
         if (cam.zoom > 5) cam.zoom = 5;
-      };
-
-      var collision = function (rect1, rect2) {
-        return (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y)
       };
 
       var doCamera = function (obj) {
@@ -244,8 +263,8 @@ var HELLO_WORLD = (function () {
         var lvl = lvlList[lvl];
         var tileset = tilesetList[lvl.tileset];
         tiles = [];
-        lvlCanvas.width = playerCanvas.width = lvl.width * 64;
-        lvlCanvas.height = playerCanvas.height = lvl.height * 64;
+        lvlCanvas.width = entityCanvas.width = lvl.width * 64;
+        lvlCanvas.height = entityCanvas.height = lvl.height * 64;
         canvas.style.background = lvl.bg;
         for (var y = 0; y < lvl.height; y++) {
           for (var x = 0; x < lvl.width; x++) {
@@ -256,32 +275,36 @@ var HELLO_WORLD = (function () {
         }
       };
 
-      var pRender = function () {
-        var x = Math.round(player.x);
-        var y = Math.round(player.y);
-        var w = player.w;
-        var h = player.h;
-        if (player.texture) playerStage.drawImage(player.texture, x, y, w, h); else playerStage.fillRect(x, y, w, h);
-      };
-
       var cRender = function () {
         var x = canvas.width / 2 - cam.x * cam.zoom;
         var y = canvas.height / 2 - cam.y * cam.zoom;
         var zoomX = lvlCanvas.width * cam.zoom;
         var zoomY = lvlCanvas.height * cam.zoom;
         stage.drawImage(lvlCanvas, x, y, zoomX, zoomY);
-        stage.drawImage(playerCanvas, x, y, zoomX, zoomY);
+        stage.drawImage(entityCanvas, x, y, zoomX, zoomY);
+      };
+
+      var doEntities = function (lvl) {
+        lvlList[lvl].entityData.forEach(function (cur) {
+          if (!(timer % 10)) {
+            cur.controls = { up: rndInt(2), down: rndInt(2), right: rndInt(2), left: rndInt(2) };
+          }
+          cur.physics(tiles, timeStep);
+          cur.render(entityStage);
+        });
       };
 
       return function (lvl) {
-        playerStage.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+        entityStage.clearRect(0, 0, entityCanvas.width, entityCanvas.height);
         if (lvl !== lastLvl) {
           renderLvl(lvl);
           lastLvl = lvl;
           setPosition(lvlList[lvl].startX, lvlList[lvl].startY);
         }
-        pControls({ up: 'KeyW', down: 'KeyS', right: 'KeyD', left: 'KeyA' });
-        pRender();
+        player.controls = { up: keys['KeyW'], down: keys['KeyS'], right: keys['KeyD'], left: keys['KeyA'] };
+        player.physics(tiles, timeStep);
+        player.render(entityStage);
+        doEntities(lvl);
         cRender();
         doCamera({ zoomIn: 'Equal', zoomOut: 'Minus' });
       }
@@ -291,6 +314,16 @@ var HELLO_WORLD = (function () {
     var fps = 0;
     var ms = 0;
     var timeStep = 1;
+    var timer = 0;
+    var lastTimer;
+
+    setInterval(function () {
+      timer++;
+    }, 100);
+
+    init();
+    ctb();
+
     return {
       loop: function (delta) {
         stage.clearRect(0, 0, canvas.width, canvas.height);
@@ -307,18 +340,23 @@ var HELLO_WORLD = (function () {
       }
     }
   })();
+};
 
-  return {
-    init: function () {
-      init();
-      ctb();
-    }
-  }
-})();
+function rndInt(max) {
+  return Math.floor(Math.random() * max);
+}
 
 function newImage(src) {
   var img = document.createElement('img');
   img.src = src;
+  var canvas = document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  ctx.scale(-1, 1);
+  ctx.translate(-img.width, 0);
+  ctx.drawImage(img, 0, 0);
+  img.flipped = canvas;
   return img;
 }
 
