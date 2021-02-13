@@ -8,7 +8,7 @@ var HELLO_WORLD = (function () {
   var canvas = document.createElement('canvas');
   var stage = canvas.getContext('2d');
   var info = {
-    version: 'v0.1-20210212-1825est',
+    version: 'v0.1-20210213-0053est',
     authors: 'Literal Line',
     width: window.innerWidth, // placeholder
     height: window.innerHeight, // placeholder
